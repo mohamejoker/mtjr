@@ -4,6 +4,9 @@ import { Helmet } from 'react-helmet';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { AdminProvider, useAdmin } from '@/contexts/AdminContext';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import { LoadingPage } from '@/components/ui/loading';
+import NotFound from '@/components/NotFound';
 import HomePage from '@/pages/HomePage';
 import AdminPage from '@/pages/AdminPage';
 import ProductPage from '@/pages/ProductPage';
@@ -19,11 +22,7 @@ const AppContent = () => {
   const { loading, siteSettings } = useAdmin();
 
   if (loading) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-background z-50">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <LoadingPage message="جاري تحميل المتجر..." />;
   }
 
   return (
@@ -35,6 +34,8 @@ const AppContent = () => {
         <meta property="og:title" content={`${siteSettings.site_name || 'Kledje'} - متجر منتجات العناية الفاخرة`} />
         <meta property="og:description" content={`اكتشف مجموعة ${siteSettings.site_name || 'Kledje'} الفريدة من منتجات العناية الطبيعية عالية الجودة`} />
         <meta property="og:type" content="website" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="theme-color" content={siteSettings.primary_color || '#f78fb3'} />
       </Helmet>
       
       <Routes>
@@ -48,6 +49,7 @@ const AppContent = () => {
         <Route path="/track-order" element={<OrderTrackingPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       
       <Toaster />
@@ -57,13 +59,15 @@ const AppContent = () => {
 
 function App() {
   return (
-    <ThemeProvider>
-      <AdminProvider>
-        <Router>
-          <AppContent />
-        </Router>
-      </AdminProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AdminProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </AdminProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 
